@@ -193,21 +193,24 @@ class MusicPlayerMain < Gosu::Window
 	    super(@WIDTH, @HEIGHT, false)
 	    self.caption = "Music Player"
 
+
+    @_selectionSquare = Gosu::Color::WHITE
+
 		# Reads in an array of albums from a file and then prints all the albums in the
     @_musicFile = File.new("albums/albums.txt", "r")
 
     readAlbums(@_musicFile)
 
     #Text Images
-    #_songsText = [numberofSongs(@_albums)]
-
-    @_songText = Gosu::Font.new(self, "Song 1", 20)
+    @_songText = Gosu::Font.new(self, "Song", 20)
 
     # array to the terminal
     #displayAlbumsInfo(@_albums)
 
     #Album Cover Image
     @_coverImage = ArtWork.new("albums/cover/Neil_Diamond_Greatest_Hits_Cover.jpg")
+
+    @info_font = Gosu::Font.new(50)
 	end
 
   # Put in your code here to load albums and tracks
@@ -223,21 +226,19 @@ class MusicPlayerMain < Gosu::Window
 
   def drawSongs(a_songs)
 
+    Gosu::Font.new(self, "Song 1", 20)
+
+    _songsText = Array.new()
+    _songsText << a_songs
+
     index = 0
     while index < a_songs.length
-    @_songText.draw_text("#{a_songs[index].name}", 10, 10, ZOrder::UI, 1.0, 1.0, Gosu::Color::GREEN)
-    index += 1
+      _songsText[index] = Gosu::Font.new(self, "Song - #{index}", 30)
+      _songsText[index].draw_text("#{a_songs[index].name}", 450, 50 + index * 60, ZOrder::UI, 1.0, 1.0, Gosu::Color::GREEN)
+      index += 1
     end
 
   end
-
-  # Detects if a 'mouse sensitive' area has been clicked on
-  # i.e either an album or a track. returns true or false
-
-  def area_clicked(leftX, topY, rightX, bottomY)
-     # complete this code
-  end
-
 
   # Takes a String title and an Integer ypos
   # You may want to use the following:
@@ -267,6 +268,10 @@ class MusicPlayerMain < Gosu::Window
 
     #Right Background
     Gosu.draw_rect(@WIDTH - 30, 0, @WIDTH, @HEIGHT, TOP_COLOR, ZOrder::BACKGROUND, mode=:default)
+
+    if mouseOverSelection(mouse_x, mouse_y)
+      Gosu.draw_rect(500, 500, @WIDTH, 200, @_selectionSquare, ZOrder::BACKGROUND, mode=:default)
+    end
 	end
 
 # Not used? Everything depends on mouse actions.
@@ -276,6 +281,10 @@ class MusicPlayerMain < Gosu::Window
 
  # Draws the album images and the track list for the selected album
 	def draw
+
+    @info_font.draw_text("mouse_x: #{mouse_x}", 0, 500, ZOrder::UI, 1.0, 1.0, Gosu::Color::RED)
+    # Draw the mouse_y position
+    @info_font.draw_text("mouse_y: #{mouse_y}", 0, 700, ZOrder::UI, 1.0, 1.0, Gosu::Color::RED)
 		# Complete the missing code
 		draw_background
     draw_albums(@albums)
@@ -283,10 +292,32 @@ class MusicPlayerMain < Gosu::Window
 
  	def needs_cursor?; true; end
 
+  # Detects if a 'mouse sensitive' area has been clicked on
+  # i.e either an album or a track. returns true or false
+
+  def area_clicked(leftX, topY, rightX, bottomY)
+    # complete this code
+  end
+
+  def mouseOverSelection(mouse_x, mouse_y)
+
+    if ((mouse_x > 50 and mouse_x < 150) and (mouse_y > 50 and mouse_y < 100))
+      true
+    else
+      false
+    end
+
+  end
+
 	def button_down(id)
 		case id
 	    when Gosu::MsLeft
 	    	# What should happen here?
+        if mouseOverSelection(mouse_x, mouse_y)
+          @_selectionSquare = Gosu::Color::YELLOW
+        else
+          @_selectionSquare = Gosu::Color::WHITE
+        end
       when Gosu::KB_ESCAPE
       close
       end
