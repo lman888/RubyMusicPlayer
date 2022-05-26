@@ -15,6 +15,14 @@ end
 
 $GENRE_NAMES = ['Pop', 'Classic', 'Jazz', 'Rock']
 
+class ArtWork
+	attr_accessor :img
+
+	def initialize (file)
+		@img = Gosu::Image.new(file)
+	end
+end
+
 class Album
     # NB: you will need to add tracks to the following and the initialize()
     attr_accessor :title, :artist, :genre, :songs
@@ -35,6 +43,20 @@ class Song
 		@name = name
 		@location = location
 	end
+end
+
+class SongTextPosition
+  attr_accessor :img, :x, :y
+
+  def initialize(file)
+    @img = Gosu::Image.new(file)
+    @x = x
+    @y = y
+  end
+
+  def drawImage(a_x, a_y)
+    @img.draw(a_x, a_y, ZOrder::BACKGROUND, 1, 1)
+  end
 end
 
 #Takes in a music file and reads in how many albums there are and populates the albums information
@@ -166,14 +188,6 @@ def displayAlbumsInfo(a_album)
 
 end
 
-class ArtWork
-	attr_accessor :img
-
-	def initialize (file)
-		@img = Gosu::Image.new(file)
-	end
-end
-
 def numberofSongs(a_album)
 
   #index = 0
@@ -201,11 +215,12 @@ class MusicPlayerMain < Gosu::Window
 
     readAlbums(@_musicFile)
 
+    @_cracklingRose = Gosu::Song.new("albums/songs/CracklingRosie.ogg")
+    @_soolaimon = Gosu::Song.new("albums/songs/Soolaimon.ogg")
+    @_sweetCaroline = Gosu::Song.new("albums/songs/SweetCaroline.ogg")
+
     #Text Images
     @_songText = Gosu::Font.new(self, "Song", 20)
-
-    # array to the terminal
-    #displayAlbumsInfo(@_albums)
 
     #Album Cover Image
     @_coverImage = ArtWork.new("albums/cover/Neil_Diamond_Greatest_Hits_Cover.jpg")
@@ -232,11 +247,24 @@ class MusicPlayerMain < Gosu::Window
     _songsText << a_songs
 
     index = 0
+    songIndex = 0
     while index < a_songs.length
+
+      songSelection(mouse_x, mouse_y)
+
       _songsText[index] = Gosu::Font.new(self, "Song - #{index}", 30)
       _songsText[index].draw_text("#{a_songs[index].name}", 450, 50 + index * 60, ZOrder::UI, 1.0, 1.0, Gosu::Color::GREEN)
+
       index += 1
     end
+
+  end
+
+  def drawSelectionBox(_song)
+
+    _selectionBox = Gosu::Color::RED
+
+    Gosu.draw_rect(415, 53, 20, 20, _selectionBox, ZOrder::BACKGROUND, mode=:default)
 
   end
 
@@ -268,10 +296,6 @@ class MusicPlayerMain < Gosu::Window
 
     #Right Background
     Gosu.draw_rect(@WIDTH - 30, 0, @WIDTH, @HEIGHT, TOP_COLOR, ZOrder::BACKGROUND, mode=:default)
-
-    if mouseOverSelection(mouse_x, mouse_y)
-      Gosu.draw_rect(500, 500, @WIDTH, 200, @_selectionSquare, ZOrder::BACKGROUND, mode=:default)
-    end
 	end
 
 # Not used? Everything depends on mouse actions.
@@ -282,9 +306,9 @@ class MusicPlayerMain < Gosu::Window
  # Draws the album images and the track list for the selected album
 	def draw
 
-    @info_font.draw_text("mouse_x: #{mouse_x}", 0, 500, ZOrder::UI, 1.0, 1.0, Gosu::Color::RED)
+    @info_font.draw_text("mouse_x: #{mouse_x}", 0, 1000, ZOrder::UI, 0.5, 0.5, Gosu::Color::RED)
     # Draw the mouse_y position
-    @info_font.draw_text("mouse_y: #{mouse_y}", 0, 700, ZOrder::UI, 1.0, 1.0, Gosu::Color::RED)
+    @info_font.draw_text("mouse_y: #{mouse_y}", 500, 1000, ZOrder::UI, 0.5, 0.5, Gosu::Color::RED)
 		# Complete the missing code
 		draw_background
     draw_albums(@albums)
@@ -297,11 +321,48 @@ class MusicPlayerMain < Gosu::Window
 
   def area_clicked(leftX, topY, rightX, bottomY)
     # complete this code
+
+
+
+  end
+
+  def songSelection(mouse_x, mouse_y)
+
+    _selectionBox = Gosu::Color::RED
+    if ((mouse_x > 450 and mouse_x < 630) and (mouse_y > 55 and mouse_y < 70))
+      #_songs.img.draw(400, 50, ZOrder::BACKGROUND, 0.1, 0.1)
+      _albumImage = ArtWork.new("albums/cover/CracklingRose.jpg")
+      Gosu.draw_rect(415, 53, 20, 20, _selectionBox, ZOrder::BACKGROUND, mode=:default)
+      _albumImage.img.draw(15, 600, ZOrder::BACKGROUND, 0.5, 0.5)
+      true
+    elsif(((mouse_x > 450 and mouse_x < 630) and (mouse_y > 113 and mouse_y < 130)))
+      #_songs.img.draw(400, 100, ZOrder::BACKGROUND, 0.1, 0.1)
+      _albumImage = ArtWork.new("albums/cover/Soolaimon.jpg")
+      Gosu.draw_rect(415, 113, 20, 20, _selectionBox, ZOrder::BACKGROUND, mode=:default)
+      _albumImage.img.draw(15, 600, ZOrder::BACKGROUND, 0.5, 0.5)
+      true
+    elsif(((mouse_x > 450 and mouse_x < 630) and (mouse_y > 176 and mouse_y < 192)))
+      #_songs.img.draw(400, 170, ZOrder::BACKGROUND, 0.1, 0.1)
+      _albumImage = ArtWork.new("albums/cover/SweetCaroline.jpg")
+      Gosu.draw_rect(415, 172, 20, 20, _selectionBox, ZOrder::BACKGROUND, mode=:default)
+      _albumImage.img.draw(15, 600, ZOrder::BACKGROUND, 0.3, 0.3)
+      true
+    else
+      false
+    end
+
   end
 
   def mouseOverSelection(mouse_x, mouse_y)
 
-    if ((mouse_x > 50 and mouse_x < 150) and (mouse_y > 50 and mouse_y < 100))
+    if ((mouse_x > 450 and mouse_x < 630) and (mouse_y > 55 and mouse_y < 70))
+      @_cracklingRose.play
+      true
+    elsif(((mouse_x > 450 and mouse_x < 630) and (mouse_y > 113 and mouse_y < 130)))
+      @_soolaimon.play
+      true
+    elsif(((mouse_x > 450 and mouse_x < 630) and (mouse_y > 176 and mouse_y < 192)))
+      @_sweetCaroline.play
       true
     else
       false
@@ -313,11 +374,7 @@ class MusicPlayerMain < Gosu::Window
 		case id
 	    when Gosu::MsLeft
 	    	# What should happen here?
-        if mouseOverSelection(mouse_x, mouse_y)
-          @_selectionSquare = Gosu::Color::YELLOW
-        else
-          @_selectionSquare = Gosu::Color::WHITE
-        end
+        mouseOverSelection(mouse_x, mouse_y)
       when Gosu::KB_ESCAPE
       close
       end
